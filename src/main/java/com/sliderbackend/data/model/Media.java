@@ -5,10 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-
-import java.util.UUID;
 
 @Document(collection = "media")
 @Data
@@ -16,11 +12,12 @@ import java.util.UUID;
 public class Media implements BaseModel {
     @Id
     private String id;
-    private String mediaType;
-    private String path;
-    private String uuid = UUID.randomUUID().toString();
+    private String resourceType;
+    private String format;
+    private String publicId;
+    private String url;
+    private String uuid;
     private String name;
+    private long position;
 
-    @Field(targetType = FieldType.BINARY)
-    private byte[] fileByte;
 }

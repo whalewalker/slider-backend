@@ -1,65 +1,29 @@
 package com.sliderbackend.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.sliderbackend.data.model.Media;
-import com.sliderbackend.data.repository.MediaRepo;
-import com.sliderbackend.exception.BadRequestException;
+import com.sliderbackend.data.model.Presentation;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.DeflaterOutputStream;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
 public class MediaService {
 
-    private final MediaRepo mediaRepo;
-    private final ModelMapper mapper;
-
-
-    public String uploadFile(MultipartFile file, String url) throws BadRequestException, IOException {
-        if (file.isEmpty()) throw new BadRequestException("File cannot be empty");
-        String baseUrl = url.substring(0, url.lastIndexOf("thullo"));
-        Media media = uploadFileData(file, baseUrl);
-        return media.getPath();
-    }
-
-
-    private Media uploadFileData(MultipartFile file, String url) throws IOException {
-        String originalFileName = file.getOriginalFilename();
-        assert originalFileName != null;
-        String fileType = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
-        byte[] compressedFile = compressFile(file.getBytes());
-        InputStream is = new ByteArrayInputStream(compressedFile);
-        Media media = Media.builder().name(originalFileName).mediaType(fileType).path(url).fileByte(is.readAllBytes()).build();
-        String path = generateMediaUrl(url, media);
-        media.setPath(path);
-        return mediaRepo.create(media);
-    }
-
-
-    private byte[] decompressFile(byte[] compressedFile) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(compressedFile);
-        GZIPInputStream gzipIn = new GZIPInputStream(bais);
-        return getBytes(gzipIn);
-    }
-
-    public Media getFile(String fileId) throws IOException {
-        Media dbFile = mediaRepo.getByFileId(fileId);
-        if (dbFile != null) {
-            byte[] compressedFile = dbFile.getFileByte();
-            byte[] decompressedFile = decompressFile(compressedFile);
-            dbFile.setFileByte(decompressedFile);
-        }
-        return dbFile;
-    }
+    private final Cloudinary cloudinary;
 
     private byte[] getBytes(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -72,11 +36,11 @@ public class MediaService {
         return baos.toByteArray();
     }
 
-    private byte[] compressFile(byte[] Media) throws IOException {
+    protected byte[] compressFile(byte[] media) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GZIPOutputStream gzipOut = new GZIPOutputStream(baos);
-        gzipOut.write(Media);
-        gzipOut.close();
+        DeflaterOutputStream deflaterOut = new DeflaterOutputStream(baos);
+        deflaterOut.write(media);
+        deflaterOut.close();
         return baos.toByteArray();
     }
 
@@ -93,14 +57,39 @@ public class MediaService {
         };
     }
 
-    public void deleteFile(String mediaId) {
-        Media media = mediaRepo.getByFileId(mediaId);
-        mediaRepo.delete(mediaId);
+    protected Presentation createPresentation(String title) {
+        return Presentation
+                .builder()
+                .title(title)
+                .uuid(UUID.randomUUID().toString())
+                .privacySettings("")
+                .build();
     }
 
-    public String generateMediaUrl(String url, Media media) {
-        String baseUrl = url.substring(0, url.lastIndexOf("thullo"));
-        return String.format("%s%s%s", baseUrl, "thullo/files/", media.getUuid()) + "." + media.getMediaType();
+    protected Media uploadToCloudinary(MultipartFile file, String fileName, String presentationId) {
+        try {
+            byte[] compressedFile = compressFile(file.getBytes());
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(compressedFile, ObjectUtils.asMap("resource_type", "auto", "public_id", presentationId + "/" + fileName));
+            String url = uploadResult.get("secure_url").toString();
+//            String format = uploadResult.get("format").toString();
+            String resourceType = uploadResult.get("resource_type").toString();
+            String publicId = uploadResult.get("public_id").toString();
+            AtomicInteger atomicCounter = new AtomicInteger(1);
+            int position = atomicCounter.getAndIncrement();
+            return Media.builder()
+                    .resourceType(resourceType)
+                    .publicId(publicId)
+                    .format(getMediaTypeForFileType(file.getContentType()).getType())
+                    .url(url)
+                    .name(format("%s_%s", file.getOriginalFilename(), position))
+                    .uuid(UUID.randomUUID().toString())
+                    .position(position)
+                    .build();
+        } catch (IOException e) {
+            // Handle the exception appropriately (e.g., logging or rethrowing)
+            throw new RuntimeException("Error uploading to Cloudinary", e);
+        }
     }
+
 
 }

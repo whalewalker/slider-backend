@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface IMediaRepo extends MongoRepository<Media, String> {
-    Optional<Media> findByMediaId(String mediaId);
+    Optional<Media> findById(String mediaId);
 }

@@ -7,8 +7,6 @@ import com.sliderbackend.exception.ResourceNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 import static java.lang.String.format;
 
 
@@ -22,7 +20,6 @@ public class MediaRepo extends RelationalBaseRepo<Media, IMediaRepo> {
     }
 
     public Media getByFileId(String mediaId) {
-        return iMediaRepo.findByMediaId(mediaId)
-                .orElseThrow(() -> new ResourceNotFoundException(format("Media with %s not found", mediaId));
+        return iMediaRepo.findById(mediaId).orElseThrow(() -> new ResourceNotFoundException(format("Media with %s not found", mediaId)));
     }
 }
