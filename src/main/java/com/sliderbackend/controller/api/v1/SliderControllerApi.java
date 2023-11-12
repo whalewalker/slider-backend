@@ -4,7 +4,7 @@ package com.sliderbackend.controller.api.v1;
 import com.sliderbackend.data.model.Presentation;
 import com.sliderbackend.data.model.general.Response;
 import com.sliderbackend.data.model.general.request.PresentationRequest;
-import com.sliderbackend.services.DocumentEditor;
+import com.sliderbackend.services.PresentationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1")
 @RequiredArgsConstructor
 public class SliderControllerApi {
-    private final DocumentEditor documentEditor;
-
+    private final PresentationService presentationService;
     @PostMapping("/upload")
     public ResponseEntity<Response<Presentation>> create(PresentationRequest request) {
-            Response<Presentation> viewResponse = documentEditor.createPresentation(request);
+            Response<Presentation> viewResponse = presentationService.createPresentation(request);
             return new ResponseEntity<>(viewResponse, HttpStatus.OK);
     }
 }

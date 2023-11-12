@@ -3,7 +3,6 @@ package com.sliderbackend.data.repository;
 import com.sliderbackend.data.model.Media;
 import com.sliderbackend.data.repository.contract.IMediaRepo;
 import com.sliderbackend.data.repository.contract.RelationalBaseRepo;
-import com.sliderbackend.exception.ResourceNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 

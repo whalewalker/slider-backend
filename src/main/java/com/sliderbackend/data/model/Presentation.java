@@ -1,5 +1,6 @@
 package com.sliderbackend.data.model;
 
+import com.sliderbackend.data.model.general.enums.StorageLocation;
 import com.sliderbackend.data.repository.BaseModel;
 import lombok.Builder;
 import lombok.Data;
@@ -15,12 +16,10 @@ import java.util.List;
 public class Presentation implements BaseModel {
     @Id
     private String id;
-    private String title;
-    private String privacySettings;
-    private String uuid;
 
-    @DBRef
-    private List<Media> content;
+    private String name;
+    private String folderId;
+    private StorageLocation storageLocation;
 }
 
 

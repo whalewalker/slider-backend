@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.sliderbackend.data.model.Media;
 import com.sliderbackend.data.model.Presentation;
+import com.sliderbackend.services.contract.ICRUDService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
-public class MediaService {
+public class MediaService implements ICRUDService<Media> {
 
     private final Cloudinary cloudinary;
 
