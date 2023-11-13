@@ -89,6 +89,15 @@
             <version>1.35.0</version>
         </dependency>
 
+        <!-- FILE UPLOAD-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.5</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

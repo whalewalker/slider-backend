@@ -15,4 +15,10 @@ public class PresentationRepo extends RelationalBaseRepo<Presentation, IPresenta
         super(iPresentationRepo, "Presentation");
         this.iPresentationRepo = iPresentationRepo;
     }
+
+
+    public Presentation getByPath(String path) {
+        return iPresentationRepo.findByPath(path).orElse(null);
+    }
+
 }

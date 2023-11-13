@@ -1,6 +1,7 @@
 package com.sliderbackend.data.repository.contract;
 
 import com.sliderbackend.data.repository.BaseModel;
+import com.sliderbackend.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
