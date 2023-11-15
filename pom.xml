@@ -89,12 +89,20 @@
             <version>1.35.0</version>
         </dependency>
 
-        <!-- FILE UPLOAD-->
+        <!-- FILE COMPRESSOR-->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.5</version>
         </dependency>
+
+        <!--PDF TO IMAGE-->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.25</version>
+        </dependency>
+
 
 
 

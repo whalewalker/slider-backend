@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-
 import static com.sliderbackend.data.model.general.enums.StorageLocation.GOOGLE_DRIVE;
 
 @Data
@@ -20,5 +18,5 @@ public class PresentationUploadDTO {
     private StorageLocation storageLocation = GOOGLE_DRIVE;
 
     @JsonIgnore
-    private File compressedFile;
+    private String path;
 }

@@ -35,29 +35,37 @@ public class GoogleDriveService implements IStorage {
     private String parentIds;
 
     @Override
-    public Response<GoogleFileDTO> uploadFileToFolder(String folderId,MultipartFile multipartFile, String mediaName, String contentType) {
+    public Response<GoogleFileDTO> uploadFileToFolder(String folderId, MultipartFile multipartFile, String mediaName, String contentType) {
         File file = new File();
         file.setName(mediaName);
         file.setParents(Collections.singletonList(folderId));
         return createFileInGoogleDrive(multipartFile, contentType, file);
     }
 
+    @Override
+    public Response<?> uploadFileToFolder(String folderId, java.io.File newFile, String mediaName, String contentType) {
+        File file = new File();
+        file.setName(mediaName);
+        file.setParents(Collections.singletonList(folderId));
+        return createFileInGoogleDrive(newFile, contentType, file);
+    }
+
 
     private Response<GoogleFileDTO> createFileInGoogleDrive(MultipartFile multipartFile, String contentType, File file) {
+        try {
+            java.io.File newFile = Utils.createTempFileFromMultipartFile(multipartFile);
+            return createFileInGoogleDrive(newFile, contentType, file);
+        } catch (Exception e) {
+            log.error(e.toString());
+            throw new SystemException("Error occurred while creating file on google drive");
+        }
+    }
+
+    private Response<GoogleFileDTO> createFileInGoogleDrive(java.io.File newFile, String contentType, File file) {
         Response<GoogleFileDTO> response = Utils.getSuccessFulResponse();
         GoogleFileDTO googleFileDto;
 
-        String fileName = multipartFile.getOriginalFilename();
-        assert fileName != null;
-        String prefix = fileName.substring(fileName.lastIndexOf("."));
-
-        java.io.File newFile = null;
-
         try {
-            newFile = java.io.File.createTempFile(fileName, prefix);
-            multipartFile.transferTo(newFile);
-
-
             FileContent content = new FileContent(contentType, newFile);
             File uploadedFile = googleDrive.files()
                     .create(file, content)
@@ -68,10 +76,6 @@ public class GoogleDriveService implements IStorage {
         } catch (Exception e) {
             log.error(e.toString());
             throw new SystemException("Error occurred while creating file on google drive");
-        } finally {
-            assert newFile != null;
-            java.io.File f = new java.io.File(newFile.toURI());
-            if (f.delete()){log.info("TEMP FILE DELETED");}
         }
 
         response.setModelList(Collections.singletonList(googleFileDto));
